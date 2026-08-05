@@ -15,6 +15,7 @@ services:
       MYSQL_DATABASE: ${DB_NAME:-ezweb}
       MYSQL_USER: ${DB_USER:-ezweb}
       MYSQL_PASSWORD: ${DB_PASS:-changeme}
+      TZ: Asia/Ho_Chi_Minh
     volumes:
       - db_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -85,6 +86,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       # Storage
       STORAGE_PATH: /app/storage
+      TZ: Asia/Ho_Chi_Minh
     ports:
       - '9180:8080'
     volumes:

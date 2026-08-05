@@ -22,7 +22,9 @@ RUN groupadd -r ezweb && useradd -r -g ezweb ezweb
 
 WORKDIR /app
 
-# Tạo thư mục storage
+# Đặt timezone cho JVM (LocalDateTime.now() trả về giờ VN)
+ENV TZ=Asia/Ho_Chi_Minh
+
 RUN mkdir -p /app/storage && chown -R ezweb:ezweb /app
 
 # Copy JAR từ stage 1

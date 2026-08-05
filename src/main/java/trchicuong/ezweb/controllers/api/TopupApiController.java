@@ -36,7 +36,7 @@ public class TopupApiController {
             return ResponseEntity.ok(response);
         }
 
-        // Convert Unix timestamp (seconds) to LocalDateTime
+        // dùng cùng timezone với Hibernate jdbc.time_zone
         LocalDateTime sinceTime = java.time.Instant.ofEpochSecond(since)
                 .atZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))
                 .toLocalDateTime();
