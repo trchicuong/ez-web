@@ -1,0 +1,209 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  th:replace="~{layout/admin :: adminLayout('Dashboard', ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        <!-- Sản phẩm -->
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-5">
+          <div class="size-9 mb-3 rounded-lg bg-blue-50 flex items-center justify-center">
+            <i class="ph ph-package text-blue-600 text-lg"></i>
+          </div>
+          <p
+            class="text-xl font-bold text-gray-900 leading-tight"
+            th:text="${#numbers.formatInteger(totalProducts, 0, 'COMMA')}"
+          >
+            0
+          </p>
+          <p class="text-xs text-gray-400 mt-1">Sản phẩm</p>
+        </div>
+
+        <!-- Danh mục -->
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-5">
+          <div class="size-9 mb-3 rounded-lg bg-purple-50 flex items-center justify-center">
+            <i class="ph ph-tag text-purple-600 text-lg"></i>
+          </div>
+          <p
+            class="text-xl font-bold text-gray-900 leading-tight"
+            th:text="${#numbers.formatInteger(totalCategories, 0, 'COMMA')}"
+          >
+            0
+          </p>
+          <p class="text-xs text-gray-400 mt-1">Danh mục</p>
+        </div>
+
+        <!-- Thành viên -->
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-5">
+          <div class="size-9 mb-3 rounded-lg bg-green-50 flex items-center justify-center">
+            <i class="ph ph-users text-green-600 text-lg"></i>
+          </div>
+          <p
+            class="text-xl font-bold text-gray-900 leading-tight"
+            th:text="${#numbers.formatInteger(totalUsers, 0, 'COMMA')}"
+          >
+            0
+          </p>
+          <p class="text-xs text-gray-400 mt-1">Thành viên</p>
+        </div>
+
+        <!-- Đơn hàng -->
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-5">
+          <div class="size-9 mb-3 rounded-lg bg-yellow-50 flex items-center justify-center">
+            <i class="ph ph-receipt text-yellow-600 text-lg"></i>
+          </div>
+          <p
+            class="text-xl font-bold text-gray-900 leading-tight"
+            th:text="${#numbers.formatInteger(totalOrders, 0, 'COMMA')}"
+          >
+            0
+          </p>
+          <p class="text-xs text-gray-400 mt-1">Đơn hàng</p>
+        </div>
+
+        <!-- Đã hoàn thành -->
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-5">
+          <div class="size-9 mb-3 rounded-lg bg-emerald-50 flex items-center justify-center">
+            <i class="ph ph-check-circle text-emerald-600 text-lg"></i>
+          </div>
+          <p
+            class="text-xl font-bold text-gray-900 leading-tight"
+            th:text="${#numbers.formatInteger(totalCompleted, 0, 'COMMA')}"
+          >
+            0
+          </p>
+          <p class="text-xs text-gray-400 mt-1">Đã hoàn thành</p>
+        </div>
+
+        <!-- Doanh thu -->
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-5">
+          <div class="size-9 mb-3 rounded-lg bg-indigo-50 flex items-center justify-center">
+            <i class="ph ph-currency-circle-dollar text-indigo-600 text-lg"></i>
+          </div>
+          <p
+            class="text-xl font-bold text-gray-900 leading-tight"
+            th:text="${#numbers.formatInteger(totalRevenue, 0, 'COMMA')}"
+          >
+            0
+          </p>
+          <p class="text-xs text-gray-400 mt-1">Doanh thu</p>
+        </div>
+      </div>
+
+      <!-- Two-col bottom -->
+      <div class="grid lg:grid-cols-5 gap-6">
+        <!-- Recent orders -->
+        <div
+          class="lg:col-span-3 rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden"
+        >
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 class="font-semibold text-gray-800 text-sm">Đơn hàng gần đây</h2>
+            <a th:href="@{/admin/orders}" class="text-xs text-indigo-600 hover:underline"
+              >Tất cả →</a
+            >
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 text-xs text-gray-400 uppercase border-b border-gray-100">
+                <tr>
+                  <th class="px-5 py-3 text-left w-14">ID</th>
+                  <th class="px-5 py-3 text-left">Khách hàng</th>
+                  <th class="px-5 py-3 text-right">Tổng</th>
+                  <th class="px-5 py-3 text-center">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                <tr th:each="order : ${recentOrders}" class="hover:bg-gray-50/60 transition-colors">
+                  <td class="px-5 py-2.5 font-mono text-gray-400 text-xs">
+                    #<span th:text="${order.id}">0</span>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <p
+                      class="font-medium text-gray-800 text-xs leading-tight truncate max-w-[130px]"
+                      th:text="${order.user.name}"
+                    >
+                      Name
+                    </p>
+                    <p
+                      class="text-gray-400 text-xs truncate max-w-[130px]"
+                      th:text="${order.user.email}"
+                    >
+                      email
+                    </p>
+                  </td>
+                  <td
+                    class="px-5 py-2.5 text-right font-medium text-xs"
+                    th:text="${#numbers.formatInteger(order.totalAmount, 0, 'COMMA') + 'đ'}"
+                  >
+                    0đ
+                  </td>
+                  <td class="px-5 py-2.5 text-center">
+                    <span
+                      th:classappend="${order.status == 'completed' ? 'bg-green-100 text-green-800' : (order.status == 'pending' ? 'bg-yellow-100 text-yellow-800' : (order.status == 'cancelled' ? 'bg-gray-100 text-gray-600' : 'bg-red-100 text-red-800'))}"
+                      class="inline-block rounded-full px-2 py-0.5 text-xs font-medium"
+                    >
+                      <span
+                        th:text="${order.status == 'completed' ? 'Hoàn thành' : (order.status == 'pending' ? 'Chờ xử lý' : (order.status == 'cancelled' ? 'Đã hủy' : 'Hoàn tiền'))}"
+                        >Status</span
+                      >
+                    </span>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(recentOrders)}">
+                  <td colspan="4" class="px-5 py-8 text-center text-gray-400 text-xs">
+                    Chưa có đơn hàng
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent users -->
+        <div
+          class="lg:col-span-2 rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden"
+        >
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 class="font-semibold text-gray-800 text-sm">Thành viên mới</h2>
+            <a th:href="@{/admin/users}" class="text-xs text-indigo-600 hover:underline"
+              >Tất cả →</a
+            >
+          </div>
+          <ul class="divide-y divide-gray-50">
+            <li
+              th:each="user : ${recentUsers}"
+              class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/60 transition-colors"
+            >
+              <img
+                th:src="${user.avatar != null and !user.avatar.isBlank() ? user.avatar : 'https://ui-avatars.com/api/?name=' + #strings.replace(user.name, ' ', '+') + '&background=random'}"
+                th:alt="${user.name}"
+                class="w-9 h-9 rounded-full object-cover flex-shrink-0"
+              />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-800 truncate" th:text="${user.name}">
+                  Name
+                </p>
+                <p class="text-xs text-gray-400 truncate" th:text="${user.email}">email</p>
+              </div>
+              <span
+                th:if="${user.role == 'ADMIN'}"
+                class="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 flex-shrink-0"
+                >Admin</span
+              >
+            </li>
+            <li
+              th:if="${#lists.isEmpty(recentUsers)}"
+              class="px-5 py-8 text-center text-gray-400 text-xs"
+            >
+              Chưa có thành viên
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

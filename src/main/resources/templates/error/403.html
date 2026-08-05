@@ -1,0 +1,28 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout/main :: layout('403 - Không có quyền', ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <div class="min-h-[50vh] flex flex-col items-center justify-center text-center py-16">
+        <div class="text-8xl font-extrabold text-gray-100 dark:text-gray-800 leading-none mb-4">
+          403
+        </div>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          Không có quyền truy cập
+        </h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Bạn không có quyền xem trang này.
+        </p>
+        <a
+          th:href="@{/}"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+        >
+          <i class="ph ph-house text-base"></i> Về trang chủ
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

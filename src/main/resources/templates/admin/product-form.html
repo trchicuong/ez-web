@@ -1,0 +1,232 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout/admin :: adminLayout(${product?.id == null ? 'Thêm sản phẩm' : 'Sửa sản phẩm'}, ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <div class="max-w-3xl">
+        <form
+          th:action="@{/admin/products/save}"
+          method="post"
+          th:object="${product}"
+          class="space-y-5"
+        >
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <input type="hidden" th:field="*{id}" />
+
+          <div class="bg-white rounded-2xl border border-gray-200 p-5">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Thông tin cơ bản</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5"
+                  >Tiêu đề <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="text"
+                  th:field="*{title}"
+                  required
+                  name="title"
+                  placeholder="Tên sản phẩm"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5"
+                  >Slug <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="text"
+                  th:field="*{slug}"
+                  name="slug"
+                  placeholder="ten-san-pham"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Danh mục</label>
+                <select
+                  name="categoryId"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option
+                    th:each="cat : ${categories}"
+                    th:value="${cat.id}"
+                    th:text="${cat.name}"
+                    th:selected="${product?.category?.id == cat.id}"
+                  >
+                    Cat
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Tóm tắt</label>
+                <input
+                  type="text"
+                  th:field="*{summary}"
+                  name="summary"
+                  placeholder="Mô tả ngắn"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5"
+                  >Mô tả chi tiết (HTML)</label
+                >
+                <textarea
+                  th:field="*{description}"
+                  name="description"
+                  rows="8"
+                  placeholder="Nội dung HTML..."
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-gray-200 p-5">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Giá cả</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5"
+                  >Giá gốc (VND) <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="number"
+                  th:field="*{price}"
+                  name="price"
+                  min="0"
+                  required
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5"
+                  >Giá khuyến mãi (bỏ trống nếu không giảm)</label
+                >
+                <input
+                  type="number"
+                  th:field="*{salePrice}"
+                  name="salePrice"
+                  min="0"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-gray-200 p-5">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Media &amp; File</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Thumbnail URL</label>
+                <input
+                  type="text"
+                  th:field="*{thumbnail}"
+                  name="thumbnail"
+                  placeholder="https://..."
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Demo URL</label>
+                <input
+                  type="text"
+                  th:field="*{demoUrl}"
+                  name="demoUrl"
+                  placeholder="https://..."
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5"
+                  >Đường dẫn file download (Google Drive, Dropbox...)</label
+                >
+                <input
+                  type="text"
+                  th:field="*{filePath}"
+                  name="filePath"
+                  placeholder="https://drive.google.com/file/d/... hoặc /uploads/file.zip"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+                <p class="text-xs text-gray-400 mt-1">Link trực tiếp đến file ZIP trên Google Drive hoặc dịch vụ khác</p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5"
+                  >Tags (phân cách bằng dấu phẩy)</label
+                >
+                <input
+                  type="text"
+                  name="tags"
+                  th:value="${product != null and product.tags != null} ? ${#strings.listJoin(product.tags, ',')} : ''"
+                  placeholder="php, laravel, mysql"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Trạng thái</label>
+                <select
+                  th:field="*{status}"
+                  name="status"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button
+              type="submit"
+              class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+            >
+              <i class="ph ph-floppy-disk text-base"></i> Lưu sản phẩm
+            </button>
+            <a
+              th:href="@{/admin/products}"
+              class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition-colors"
+              >Hủy</a
+            >
+          </div>
+        </form>
+
+        <script th:inline="javascript">
+          // Auto-generate slug from title (only when creating new product)
+          /*<![CDATA[*/
+          const isEditMode = /*[[${product?.id != null}]]*/ false;
+          
+          if (!isEditMode) {
+            const titleInput = document.querySelector('[name="title"]');
+            const slugInput = document.querySelector('[name="slug"]');
+            let slugTouched = false;
+
+            if (slugInput) {
+              slugInput.addEventListener('input', () => { slugTouched = true; });
+            }
+
+            if (titleInput) {
+              titleInput.addEventListener('input', () => {
+                if (slugTouched) return;
+                const raw = titleInput.value
+                  .toLowerCase()
+                  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                  .replace(/đ/g, 'd')
+                  .replace(/[^a-z0-9\\s-]/g, '')
+                  .trim()
+                  .replace(/\\s+/g, '-')
+                  .replace(/-+/g, '-');
+                if (slugInput) slugInput.value = raw;
+              });
+            }
+          }
+          /*]]>*/
+        </script>
+      </div>
+      </div>
+    </div>
+  </body>
+</html>

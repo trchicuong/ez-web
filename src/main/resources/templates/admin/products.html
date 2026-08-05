@@ -1,0 +1,176 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout/admin :: adminLayout('Sản phẩm', ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <div class="flex items-center justify-between mb-6">
+        <p class="text-sm text-gray-500">
+          Tổng:
+          <strong
+            class="text-gray-800"
+            th:text="${#numbers.formatInteger(products.totalElements, 0, 'COMMA')}"
+            >0</strong
+          >
+          sản phẩm
+        </p>
+        <a
+          th:href="@{/admin/products/new}"
+          class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+        >
+          <i class="ph ph-plus-circle text-base"></i> Thêm sản phẩm
+        </a>
+      </div>
+
+      <div class="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-xs text-gray-400 uppercase border-b border-gray-100">
+              <tr>
+                <th class="px-5 py-3 text-left w-12">ID</th>
+                <th class="px-5 py-3 text-left">Sản phẩm</th>
+                <th class="px-5 py-3 text-left">Danh mục</th>
+                <th class="px-5 py-3 text-right">Giá</th>
+                <th class="px-5 py-3 text-center">Trạng thái</th>
+                <th class="px-5 py-3 text-right w-24">Downloads</th>
+                <th class="px-5 py-3 text-center w-28">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <tr th:each="p : ${products}" class="hover:bg-gray-50/60 transition-colors">
+                <td class="px-5 py-3 text-gray-400 font-mono text-xs" th:text="${p.id}">0</td>
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <img
+                      th:if="${p.thumbnail != null and !p.thumbnail.isEmpty()}"
+                      th:src="${p.thumbnail}"
+                      th:alt="${p.title}"
+                      class="size-10 rounded-lg object-cover flex-shrink-0 bg-gray-100"
+                      loading="lazy"
+                      onerror="
+                        this.onerror = null;
+                        this.src = '/images/placeholder.png';
+                      "
+                    />
+                    <div
+                      th:unless="${p.thumbnail != null and !p.thumbnail.isEmpty()}"
+                      class="size-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0"
+                    >
+                      <i class="ph ph-image text-gray-300 text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                      <p
+                        class="font-medium text-gray-800 truncate max-w-[200px]"
+                        th:text="${p.title}"
+                      >
+                        Title
+                      </p>
+                      <p class="text-xs text-gray-400 truncate max-w-[200px]" th:text="${p.slug}">
+                        slug
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3 text-gray-600 text-xs" th:text="${p.category?.name}">Cat</td>
+                <td class="px-5 py-3 text-right">
+                  <div th:if="${p.onSale}">
+                    <p
+                      class="font-medium text-red-600"
+                      th:text="${#numbers.formatInteger(p.salePrice, 0, 'COMMA') + 'đ'}"
+                    >
+                      0đ
+                    </p>
+                    <p
+                      class="text-xs text-gray-400 line-through"
+                      th:text="${#numbers.formatInteger(p.price, 0, 'COMMA') + 'đ'}"
+                    >
+                      0đ
+                    </p>
+                  </div>
+                  <p
+                    th:unless="${p.onSale}"
+                    class="font-medium text-gray-800"
+                    th:text="${p.price == 0 ? 'Miễn phí' : #numbers.formatInteger(p.price, 0, 'COMMA') + 'đ'}"
+                  >
+                    0đ
+                  </p>
+                </td>
+                <td class="px-5 py-3 text-center">
+                  <span
+                    class="inline-block rounded-full px-2 py-0.5 text-xs font-medium"
+                    th:classappend="${p.status == 'active'} ? ' bg-green-100 text-green-700' : (${p.status == 'draft'} ? ' bg-yellow-100 text-yellow-700' : ' bg-gray-100 text-gray-500')"
+                    th:text="${p.status}"
+                    >active</span
+                  >
+                </td>
+                <td
+                  class="px-5 py-3 text-right text-xs text-gray-500"
+                  th:text="${#numbers.formatInteger(p.downloads, 0, 'COMMA')}"
+                >
+                  0
+                </td>
+                <td class="px-5 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <a
+                      th:href="@{/admin/products/{id}/edit(id=${p.id})}"
+                      class="rounded p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      title="Sửa"
+                      ><i class="ph ph-pencil text-base"></i
+                    ></a>
+                    <form
+                      th:action="@{/admin/products/{id}/delete(id=${p.id})}"
+                      method="post"
+                      class="inline"
+                    >
+                      <input
+                        type="hidden"
+                        th:name="${_csrf.parameterName}"
+                        th:value="${_csrf.token}"
+                      />
+                      <button
+                        type="submit"
+                        th:attr="data-confirm='Xóa sản phẩm &quot;' + ${p.title} + '&quot;? Hành động này không thể hoàn tác.'"
+                        class="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        title="Xóa"
+                      >
+                        <i class="ph ph-trash text-base"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${products.isEmpty()}">
+                <td colspan="7" class="px-5 py-10 text-center text-gray-400 text-sm">
+                  Chưa có sản phẩm nào
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          th:if="${products.totalPages > 1}"
+          class="flex items-center justify-between border-t border-gray-100 px-5 py-3 text-sm text-gray-500"
+        >
+          <span
+            th:text="${(products.number * products.size) + 1} + '–' + ${T(java.lang.Math).min((products.number + 1) * products.size, products.totalElements)} + ' / ' + ${products.totalElements}"
+            >1–20 / 0</span
+          >
+          <div class="flex gap-1">
+            <a
+              th:each="i : ${#numbers.sequence(0, T(java.lang.Math).min(products.totalPages - 1, 9))}"
+              th:href="@{/admin/products(page=${i})}"
+              th:classappend="${i == products.number ? ' bg-indigo-600 text-white' : ' hover:bg-gray-100'}"
+              class="px-3 py-1 rounded text-xs"
+              th:text="${i + 1}"
+              >1</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

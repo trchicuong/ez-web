@@ -1,0 +1,215 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout/main :: layout(${pageTitle ?: 'Tìm kiếm'}, ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <!-- Search bar -->
+      <div class="mb-6">
+        <form action="/search" method="GET" class="relative max-w-2xl">
+          <span
+            class="absolute inset-y-0 left-4 flex items-center text-gray-400 pointer-events-none"
+          >
+            <i class="ph ph-magnifying-glass text-xl"></i>
+          </span>
+          <input
+            type="search"
+            name="q"
+            th:value="${param.q}"
+            placeholder="Tìm source code, template, tool..."
+            autofocus
+            class="w-full pl-12 pr-4 py-3 text-sm bg-white dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+          />
+          <button
+            type="submit"
+            class="absolute inset-y-0 right-0 px-4 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-r-xl transition-colors"
+          >
+            Tìm
+          </button>
+        </form>
+
+        <!-- Result count -->
+        <p
+          th:if="${param.q != null and !param.q.isEmpty()}"
+          class="mt-3 text-sm text-gray-500 dark:text-gray-400"
+        >
+          <span th:if="${not products.isEmpty()}">
+            Tìm thấy
+            <span
+              class="font-semibold text-gray-900 dark:text-white"
+              th:text="${products.totalElements}"
+              >0</span
+            >
+            kết quả cho
+            <span
+              class="font-semibold text-gray-900 dark:text-white"
+              th:text="'&quot;' + ${param.q} + '&quot;'"
+              >"keyword"</span
+            >
+          </span>
+          <span th:if="${products.isEmpty()}">
+            Không tìm thấy kết quả nào cho
+            <span
+              class="font-semibold text-gray-900 dark:text-white"
+              th:text="'&quot;' + ${param.q} + '&quot;'"
+              >"keyword"</span
+            >
+          </span>
+        </p>
+      </div>
+
+      <!-- Default state (no search) -->
+      <div th:if="${param.q == null or param.q.isEmpty()}" class="text-center py-16">
+        <span
+          class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4"
+        >
+          <i class="ph ph-magnifying-glass text-gray-300 dark:text-gray-600 text-3xl"></i>
+        </span>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
+          Tìm kiếm sản phẩm
+        </h2>
+        <p class="text-sm text-gray-400 dark:text-gray-500">
+          Nhập từ khoá để tìm source code, template hoặc tool.
+        </p>
+      </div>
+
+      <!-- No results -->
+      <div
+        th:if="${param.q != null and !param.q.isEmpty() and products.isEmpty()}"
+        class="text-center py-16"
+      >
+        <span
+          class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4"
+        >
+          <i class="ph ph-smiley-sad text-gray-300 dark:text-gray-600 text-3xl"></i>
+        </span>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-1">
+          Không tìm thấy kết quả
+        </h2>
+        <p class="text-sm text-gray-400 dark:text-gray-500 mb-5">
+          Thử từ khoá khác hoặc xem các sản phẩm nổi bật.
+        </p>
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+        >
+          <i class="ph ph-storefront text-base"></i> Xem tất cả sản phẩm
+        </a>
+      </div>
+
+      <!-- Results grid -->
+      <div
+        th:if="${param.q != null and !param.q.isEmpty() and not products.isEmpty()}"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      >
+        <article
+          th:each="p : ${products.content}"
+          class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-200"
+        >
+          <a
+            th:href="@{/product/{s}(s=${p.slug})}"
+            class="block relative overflow-hidden bg-gray-50 aspect-video"
+          >
+            <img
+              th:src="${p.thumbnail}"
+              th:alt="${p.title}"
+              loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onerror="
+                this.onerror = null;
+                this.src = '/images/placeholder.png';
+              "
+            />
+            <span
+              th:if="${p.onSale}"
+              class="absolute top-2.5 left-2.5 px-2 py-0.5 bg-red-500 text-white text-xs font-semibold rounded-md"
+              >Sale</span
+            >
+            <span
+              class="absolute top-2.5 right-2.5 px-2 py-0.5 bg-white/90 dark:bg-gray-800/90 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md border border-gray-100 dark:border-gray-600"
+              th:text="${p.category?.name}"
+              >Cat</span
+            >
+          </a>
+          <div class="flex flex-col flex-1 p-3.5">
+            <a
+              th:href="@{/product/{s}(s=${p.slug})}"
+              class="text-[13px] font-semibold text-gray-900 dark:text-white leading-snug mb-1.5 hover:text-blue-600 transition-colors line-clamp-2"
+              th:text="${p.title}"
+              >Title</a
+            >
+            <p
+              class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-2 line-clamp-2 flex-1"
+              th:text="${p.summary}"
+            ></p>
+            <div class="flex flex-wrap gap-1 mb-2" th:if="${not #lists.isEmpty(p.tags)}">
+              <span
+                th:each="tag : ${p.tags}"
+                class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded"
+                th:text="${tag}"
+                >tag</span
+              >
+            </div>
+            <div
+              class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50 dark:border-gray-700"
+            >
+              <div>
+                <span
+                  th:if="${p.onSale}"
+                  class="text-sm font-bold text-red-600"
+                  th:text="${#numbers.formatInteger(p.salePrice, 0, 'COMMA') + 'đ'}"
+                  >0đ</span
+                >
+                <span
+                  th:if="${p.onSale}"
+                  class="text-xs text-gray-400 line-through ml-1"
+                  th:text="${#numbers.formatInteger(p.price, 0, 'COMMA') + 'đ'}"
+                ></span>
+                <span
+                  th:unless="${p.onSale}"
+                  class="text-sm font-bold text-gray-900 dark:text-white"
+                  th:text="${p.price == 0 ? 'Miễn phí' : #numbers.formatInteger(p.price, 0, 'COMMA') + 'đ'}"
+                  >0đ</span
+                >
+              </div>
+              <a
+                th:href="@{/product/{s}(s=${p.slug})}"
+                class="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-0.5"
+              >
+                Chi tiết <i class="ph ph-arrow-right text-xs"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-center gap-1.5 mt-6" th:if="${products.totalPages > 1}">
+        <a
+          th:href="@{/search(q=${param.q}, page=${products.number - 1})}"
+          class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors"
+          th:classappend="${products.first ? ' opacity-40 pointer-events-none' : ''}"
+        >
+          <i class="ph ph-caret-left text-sm"></i>
+        </a>
+        <a
+          th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
+          th:href="@{/search(q=${param.q}, page=${i})}"
+          class="w-9 h-9 flex items-center justify-center rounded-xl border text-sm font-medium transition-colors"
+          th:classappend="${i == products.number ? ' bg-blue-600 text-white border-blue-600' : ' border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'}"
+          th:text="${i + 1}"
+          >1</a
+        >
+        <a
+          th:href="@{/search(q=${param.q}, page=${products.number + 1})}"
+          class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors"
+          th:classappend="${products.last ? ' opacity-40 pointer-events-none' : ''}"
+        >
+          <i class="ph ph-caret-right text-sm"></i>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

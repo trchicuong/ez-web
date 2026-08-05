@@ -1,0 +1,361 @@
+/* ============================================================
+   EZWeb � app.css
+   Dark mode tokens, page-wrapper, rolling door, animations.
+   All store UI uses Tailwind classes in HTML.
+   ============================================================ */
+
+:root {
+  --body-bg: #f9fafb;
+  --body-text: #111827;
+}
+html.dark {
+  --body-bg: #0f172a;
+  --body-text: #e2e8f0;
+}
+body {
+  background-color: var(--body-bg) !important;
+  color: var(--body-text);
+}
+
+/* header(64px) + catnav(48px) = 112px */
+.page-wrapper {
+  padding-top: 112px;
+}
+
+/* hide horizontal scrollbar in category nav */
+.nav-scroll::-webkit-scrollbar {
+  height: 0;
+}
+
+/* -- Rolling Door ------------------------------------------- */
+.ez-door {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9000;
+  background: #fff;
+  transform: translateY(0);
+  transition: transform 0.55s cubic-bezier(0.77, 0, 0.18, 1);
+  overflow-y: auto;
+}
+html.dark .ez-door {
+  background: #0f172a;
+}
+.ez-door.is-open {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+/* Applied before render so the door never flashes on reload */
+html[data-door='open'] .ez-door {
+  transform: translateY(-100%);
+  pointer-events: none;
+  transition: none;
+}
+
+/* -- Landing Page Animations -------------------------------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+.animate-slide-up {
+  animation: slide-up 0.7s ease-out 0.2s backwards;
+}
+
+/* Grid pattern for hero bg */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* -- Product description prose ------------------------------ */
+.product-description p {
+  margin-bottom: 0.75rem;
+}
+.product-description h2,
+.product-description h3,
+.product-description h4 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+  color: #111827;
+}
+html.dark .product-description h2,
+html.dark .product-description h3,
+html.dark .product-description h4 {
+  color: #e2e8f0;
+}
+.product-description ul,
+.product-description ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+  list-style: revert;
+}
+.product-description li {
+  margin-bottom: 0.25rem;
+}
+.product-description code {
+  background: #f3f4f6;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+html.dark .product-description code {
+  background: #374151;
+  color: #e5e7eb;
+}
+.product-description a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+html.dark .product-description a {
+  color: #60a5fa;
+}
+
+/* -- AI Chat bubbles --------------------------------------- */
+.ez-chat-msg {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.ez-chat-msg.user {
+  align-self: flex-end;
+  background-color: #2563eb;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  white-space: pre-wrap;
+}
+.ez-chat-msg.bot {
+  align-self: flex-start;
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border-bottom-left-radius: 4px;
+}
+html.dark .ez-chat-msg.bot {
+  background-color: #334155;
+  color: #e2e8f0;
+}
+/* Prose styles for rendered markdown inside bot bubbles */
+.ez-chat-msg.bot p {
+  margin-bottom: 0.4rem;
+}
+.ez-chat-msg.bot p:last-child {
+  margin-bottom: 0;
+}
+.ez-chat-msg.bot ul,
+.ez-chat-msg.bot ol {
+  padding-left: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+.ez-chat-msg.bot ul {
+  list-style: disc;
+}
+.ez-chat-msg.bot ol {
+  list-style: decimal;
+}
+.ez-chat-msg.bot li {
+  margin-bottom: 0.15rem;
+}
+.ez-chat-msg.bot strong {
+  font-weight: 600;
+}
+.ez-chat-msg.bot em {
+  font-style: italic;
+}
+.ez-chat-msg.bot h1,
+.ez-chat-msg.bot h2,
+.ez-chat-msg.bot h3,
+.ez-chat-msg.bot h4 {
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+  line-height: 1.3;
+}
+.ez-chat-msg.bot h1 {
+  font-size: 1rem;
+}
+.ez-chat-msg.bot h2 {
+  font-size: 0.9375rem;
+}
+.ez-chat-msg.bot h3,
+.ez-chat-msg.bot h4 {
+  font-size: 0.875rem;
+}
+.ez-chat-msg.bot code {
+  background: rgba(0, 0, 0, 0.07);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+.ez-chat-msg.bot pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  margin: 0.4rem 0;
+}
+.ez-chat-msg.bot pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.ez-chat-msg.bot a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+html.dark .ez-chat-msg.bot code {
+  background: rgba(255, 255, 255, 0.1);
+}
+html.dark .ez-chat-msg.bot a {
+  color: #60a5fa;
+}
+.product-description pre {
+  background: #1f2937;
+  color: #e5e7eb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.8em;
+  margin-bottom: 0.75rem;
+}
+.product-description blockquote {
+  border-left: 3px solid #e5e7eb;
+  padding-left: 1rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+}
+
+/* Phosphor icon spin */
+.ph-spin {
+  animation: ph-spin 0.8s linear infinite;
+}
+@keyframes ph-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* -- Scroll-triggered section reveal ----------------------- */
+.ez-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.ez-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.ez-reveal-delay-1 {
+  transition-delay: 0.1s;
+}
+.ez-reveal-delay-2 {
+  transition-delay: 0.2s;
+}
+.ez-reveal-delay-3 {
+  transition-delay: 0.3s;
+}
+.ez-reveal-delay-4 {
+  transition-delay: 0.4s;
+}
+
+/* -- Tech stack marquee ------------------------------------ */
+.marquee-wrapper {
+  overflow: hidden;
+}
+.marquee-inner {
+  display: flex;
+  gap: 1rem;
+  animation: marquee-scroll 32s linear infinite;
+  width: max-content;
+}
+.marquee-wrapper:hover .marquee-inner {
+  animation-play-state: paused;
+}
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* -- FAQ accordion ----------------------------------------- */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.faq-item.open .faq-answer {
+  max-height: 320px;
+}
+.faq-chevron {
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+}
+
+/* -- Chat preset chips ------------------------------------- */
+#ez-chat-presets::-webkit-scrollbar {
+  height: 0;
+}
+
+/* -- Hero card float animation ----------------------------- */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+.animate-float {
+  animation: float-y 5s ease-in-out infinite;
+}
+
+/* -- Wave section divider ---------------------------------- */
+.wave-divider {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+.wave-divider svg {
+  display: block;
+}

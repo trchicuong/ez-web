@@ -1,0 +1,273 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout/admin :: adminLayout('Quản lý nạp tiền', ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <!-- Stats strip -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-4">
+          <p class="text-xs text-gray-400 mb-1">Tổng giao dịch</p>
+          <p
+            class="text-xl font-bold text-gray-900"
+            th:text="${#numbers.formatInteger(totalCount, 0, 'COMMA')}"
+          >
+            0
+          </p>
+        </div>
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-4">
+          <p class="text-xs text-gray-400 mb-1">Tổng tiền đã nhận</p>
+          <p
+            class="text-xl font-bold text-green-700"
+            th:text="${#numbers.formatInteger(totalRevenue, 0, 'COMMA') + 'đ'}"
+          >
+            0đ
+          </p>
+        </div>
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm p-4">
+          <p class="text-xs text-gray-400 mb-1">Chưa khớp</p>
+          <p
+            class="text-xl font-bold text-yellow-600"
+            th:text="${#numbers.formatInteger(unmatchedCount, 0, 'COMMA')}"
+          >
+            0
+          </p>
+        </div>
+      </div>
+
+      <!-- Filters + search -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <a
+          th:href="@{/admin/topups(q=${search})}"
+          th:classappend="${status == '' ? ' bg-indigo-600 text-white border-indigo-600' : ' bg-white text-gray-600 border-gray-200 hover:border-indigo-400'}"
+          class="rounded-full px-4 py-1.5 text-xs font-medium border transition-colors"
+        >
+          Tất cả
+        </a>
+        <a
+          th:href="@{/admin/topups(status='matched', q=${search})}"
+          th:classappend="${status == 'matched' ? ' bg-indigo-600 text-white border-indigo-600' : ' bg-white text-gray-600 border-gray-200 hover:border-indigo-400'}"
+          class="rounded-full px-4 py-1.5 text-xs font-medium border transition-colors"
+        >
+          Đã khớp
+        </a>
+        <a
+          th:href="@{/admin/topups(status='unmatched', q=${search})}"
+          th:classappend="${status == 'unmatched' ? ' bg-indigo-600 text-white border-indigo-600' : ' bg-white text-gray-600 border-gray-200 hover:border-indigo-400'}"
+          class="rounded-full px-4 py-1.5 text-xs font-medium border transition-colors"
+        >
+          Chưa khớp
+        </a>
+
+        <form method="GET" action="/admin/topups" class="ml-auto flex items-center gap-2">
+          <input type="hidden" name="status" th:value="${status}" />
+          <input
+            type="text"
+            name="q"
+            th:value="${search}"
+            placeholder="Tìm tên, email, nội dung CK..."
+            class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none w-52"
+          />
+          <button
+            class="rounded-lg bg-indigo-600 text-white px-3 py-1.5 text-xs hover:bg-indigo-700 transition-colors"
+          >
+            Tìm
+          </button>
+          <a
+            th:if="${!search.isEmpty()}"
+            th:href="@{/admin/topups(status=${status})}"
+            class="text-xs text-gray-400 hover:text-gray-600"
+            >✕ Xóa</a
+          >
+        </form>
+      </div>
+
+      <!-- Table -->
+      <div class="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-xs text-gray-400 uppercase border-b border-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-left w-12">ID</th>
+                <th class="px-4 py-3 text-left">Người dùng</th>
+                <th class="px-4 py-3 text-right">Số tiền</th>
+                <th class="px-4 py-3 text-center">TT</th>
+                <th class="px-4 py-3 text-left">Provider</th>
+                <th class="px-4 py-3 text-left max-w-xs">Nội dung CK</th>
+                <th class="px-4 py-3 text-left">Thời gian</th>
+                <th class="px-4 py-3 text-center w-24">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <tr th:each="log : ${logs.content}" class="hover:bg-gray-50/60 transition-colors">
+                <td class="px-4 py-3 font-mono text-gray-400 text-xs" th:text="${log.id}">0</td>
+                <td class="px-4 py-3">
+                  <span th:if="${log.user != null}">
+                    <a
+                      th:href="@{/admin/users/{id}(id=${log.user.id})}"
+                      class="text-indigo-600 hover:underline font-medium text-xs"
+                      th:text="${log.user.name}"
+                      >Name</a
+                    >
+                    <p class="text-xs text-gray-400" th:text="${log.user.email}">email</p>
+                  </span>
+                  <span th:unless="${log.user != null}" class="text-gray-400 text-xs italic"
+                    >Chưa khớp user</span
+                  >
+                </td>
+                <td
+                  class="px-4 py-3 text-right font-bold text-green-700"
+                  th:text="'+' + ${#numbers.formatInteger(log.amount, 0, 'COMMA') + 'đ'}"
+                >
+                  +0đ
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <span
+                    th:if="${log.status == 'matched'}"
+                    class="inline-block rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700"
+                    >Đã khớp</span
+                  >
+                  <span
+                    th:unless="${log.status == 'matched'}"
+                    class="inline-block rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700"
+                    >Chưa khớp</span
+                  >
+                </td>
+                <td class="px-4 py-3 text-xs text-gray-500" th:text="${log.provider}">-</td>
+                <td class="px-4 py-3">
+                  <p
+                    class="text-xs text-gray-600 max-w-[200px] truncate"
+                    th:text="${log.transferCode}"
+                    th:title="${log.transferCode}"
+                  ></p>
+                  <p
+                    class="text-xs text-gray-400 font-mono truncate max-w-[200px]"
+                    th:text="${log.providerId}"
+                  ></p>
+                </td>
+                <td
+                  class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap"
+                  th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm')}"
+                >
+                  00/00/0000
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button
+                    th:if="${log.status == 'unmatched'}"
+                    th:attr="onclick='openMatchModal(' + ${log.id} + ', \'' + ${#numbers.formatInteger(log.amount, 0, 'COMMA') + 'đ'} + '\')'"
+                    class="rounded-lg bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-2 py-1 text-xs transition-colors font-medium"
+                  >
+                    Khớp thủ công
+                  </button>
+                  <span th:unless="${log.status == 'unmatched'}" class="text-gray-300 text-xs">
+                    <i class="ph ph-check-circle text-green-400"></i>
+                  </span>
+                </td>
+              </tr>
+              <tr th:if="${logs.isEmpty()}">
+                <td colspan="8" class="px-5 py-10 text-center text-gray-400 text-sm">
+                  Không có giao dịch nào
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          th:if="${logs.totalPages > 1}"
+          class="flex items-center justify-between border-t border-gray-100 px-5 py-3 text-sm text-gray-500"
+        >
+          <span
+            th:text="${(logs.number * logs.size) + 1} + '–' + ${T(java.lang.Math).min((logs.number + 1) * logs.size, logs.totalElements)} + ' / ' + ${logs.totalElements}"
+            >1–20 / 100</span
+          >
+          <div class="flex gap-1">
+            <a
+              th:each="i : ${#numbers.sequence(0, T(java.lang.Math).min(logs.totalPages - 1, 9))}"
+              th:href="@{/admin/topups(page=${i}, status=${status}, q=${search})}"
+              th:classappend="${i == logs.number ? ' bg-indigo-600 text-white' : ' hover:bg-gray-100'}"
+              class="px-3 py-1 rounded text-xs"
+              th:text="${i + 1}"
+              >1</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual match modal -->
+    <div
+      id="matchModal"
+      class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="font-semibold text-gray-900">Khớp thủ công</h3>
+          <button onclick="closeMatchModal()" class="text-gray-400 hover:text-gray-700">
+            <i class="ph ph-x text-xl"></i>
+          </button>
+        </div>
+        <p class="text-sm text-gray-600 mb-1">
+          Số tiền: <strong id="matchAmount" class="text-green-700"></strong>
+        </p>
+        <p class="text-sm text-gray-500 mb-5">
+          Nhập ID người dùng để cộng số tiền này vào ví của họ.
+        </p>
+        <form id="matchForm" method="POST" action="">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-600 mb-1.5">
+              ID người dùng <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              name="userId"
+              required
+              min="1"
+              placeholder="Nhập user ID..."
+              class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+            />
+            <p class="text-xs text-gray-400 mt-1">
+              Tra cứu ID tại
+              <a th:href="@{/admin/users}" target="_blank" class="text-indigo-500 hover:underline"
+                >trang Người dùng</a
+              >
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button
+              type="submit"
+              class="flex-1 rounded-lg bg-green-600 text-white py-2.5 text-sm font-medium hover:bg-green-700 transition-colors"
+            >
+              Xác nhận khớp
+            </button>
+            <button
+              type="button"
+              onclick="closeMatchModal()"
+              class="flex-1 rounded-lg border border-gray-200 text-gray-600 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function openMatchModal(logId, amount) {
+        document.getElementById('matchAmount').textContent = amount;
+        document.getElementById('matchForm').action = '/admin/topups/' + logId + '/match';
+        document.getElementById('matchModal').classList.remove('hidden');
+      }
+      function closeMatchModal() {
+        document.getElementById('matchModal').classList.add('hidden');
+      }
+      document.getElementById('matchModal').addEventListener('click', function (e) {
+        if (e.target === this) closeMatchModal();
+      });
+    </script>
+  </body>
+</html>

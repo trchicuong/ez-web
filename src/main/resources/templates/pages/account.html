@@ -1,0 +1,157 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  th:replace="~{layout/main :: layout('Tài khoản', ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <div class="max-w-3xl mx-auto py-4 space-y-5">
+        <!-- Profile card -->
+        <div
+          class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm p-6"
+        >
+          <div class="flex items-center gap-4">
+            <div
+              class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
+              th:text="${#strings.toUpperCase(#strings.substring(currentUser?.name ?: 'U', 0, 1))}"
+            >
+              U
+            </div>
+            <div class="flex-1 min-w-0">
+              <h1
+                class="text-lg font-bold text-gray-900 dark:text-white truncate"
+                th:text="${currentUser?.name}"
+              >
+                Name
+              </h1>
+              <p class="text-sm text-gray-400 truncate" th:text="${currentUser?.email}">email</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div
+                class="text-xl font-bold text-gray-900 dark:text-white"
+                th:text="${#numbers.formatInteger(currentUser?.balance ?: 0, 0, 'COMMA') + 'đ'}"
+              >
+                0đ
+              </div>
+              <div class="text-xs text-gray-400 mb-1.5">Số dư ví</div>
+              <a
+                th:href="@{/topup}"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                <i class="ph ph-wallet text-sm"></i> Nạp tiền
+              </a>
+            </div>
+          </div>
+          <div
+            class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700 flex items-center gap-3"
+          >
+            <span
+              sec:authorize="hasAuthority('ADMIN')"
+              class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 text-xs font-semibold rounded-full"
+            >
+              <i class="ph ph-shield-check text-sm"></i> Admin
+            </span>
+            <span
+              sec:authorize="!hasAuthority('ADMIN')"
+              class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full"
+            >
+              <i class="ph ph-user text-sm"></i> Khách hàng
+            </span>
+          </div>
+        </div>
+
+        <!-- Update name -->
+        <div
+          class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm p-6"
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
+          >
+            <i class="ph ph-pencil-simple text-blue-600 text-base"></i> Cập nhật tên hiển thị
+          </h2>
+          <form th:action="@{/account/update}" method="post" class="flex items-end gap-3">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="flex-1">
+              <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5"
+                >Họ và tên</label
+              >
+              <input
+                type="text"
+                name="name"
+                maxlength="120"
+                th:value="${currentUser?.name}"
+                class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+            <button
+              type="submit"
+              class="flex-shrink-0 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+            >
+              Lưu
+            </button>
+          </form>
+        </div>
+
+        <!-- Change password -->
+        <div
+          class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm p-6"
+        >
+          <h2
+            class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
+          >
+            <i class="ph ph-lock-key text-blue-600 text-base"></i> Đổi mật khẩu
+          </h2>
+          <form th:action="@{/account/change-password}" method="post" class="space-y-3">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div>
+              <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5"
+                >Mật khẩu hiện tại</label
+              >
+              <input
+                type="password"
+                name="currentPassword"
+                required
+                placeholder="••••••••"
+                class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5"
+                  >Mật khẩu mới</label
+                >
+                <input
+                  type="password"
+                  name="newPassword"
+                  required
+                  placeholder="••••••••"
+                  class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5"
+                  >Xác nhận mật khẩu</label
+                >
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  placeholder="••••••••"
+                  class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+            >
+              Đổi mật khẩu
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

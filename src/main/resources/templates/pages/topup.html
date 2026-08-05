@@ -1,0 +1,540 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+  th:replace="~{layout/main :: layout('Nạp tiền', ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <!-- Toast container -->
+      <div
+        id="ez-toast-container"
+        class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 pointer-events-none"
+      ></div>
+      <div class="max-w-4xl mx-auto py-4 px-3">
+        <!-- Page Header -->
+        <div class="flex items-center gap-3 mb-5">
+          <a
+            href="/"
+            class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-500 dark:text-gray-400"
+          >
+            <i class="ph ph-arrow-left text-xl"></i>
+          </a>
+          <div class="flex-1">
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Nạp tiền</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Số dư hiện tại:
+              <span
+                class="font-semibold text-green-600"
+                th:text="${#numbers.formatInteger(currentUser?.balance ?: 0, 0, 'COMMA') + 'đ'}"
+                >0đ</span
+              >
+            </p>
+          </div>
+          <a href="#topup-history" class="text-sm text-blue-600 hover:underline font-medium"
+            >Lịch sử →</a
+          >
+        </div>
+
+        <!-- 2-column grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- ===== LEFT COLUMN ===== -->
+          <div class="space-y-4">
+            <!-- Amount Picker -->
+            <div
+              class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4"
+            >
+              <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Chọn số tiền nạp
+              </h2>
+              <div class="grid grid-cols-3 gap-2 mb-3" id="amountGrid">
+                <button
+                  type="button"
+                  class="amount-btn py-2.5 rounded-xl border-2 text-sm font-semibold transition border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                  data-amount="50000"
+                >
+                  50k
+                </button>
+                <button
+                  type="button"
+                  class="amount-btn py-2.5 rounded-xl border-2 text-sm font-semibold transition border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                  data-amount="100000"
+                >
+                  100k
+                </button>
+                <button
+                  type="button"
+                  class="amount-btn py-2.5 rounded-xl border-2 text-sm font-semibold transition border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                  data-amount="200000"
+                >
+                  200k
+                </button>
+                <button
+                  type="button"
+                  class="amount-btn py-2.5 rounded-xl border-2 text-sm font-semibold transition border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                  data-amount="500000"
+                >
+                  500k
+                </button>
+                <button
+                  type="button"
+                  class="amount-btn py-2.5 rounded-xl border-2 text-sm font-semibold transition border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                  data-amount="1000000"
+                >
+                  1M
+                </button>
+              </div>
+              <div class="flex gap-2">
+                <input
+                  id="customAmount"
+                  type="number"
+                  min="10000"
+                  step="1000"
+                  placeholder="Hoặc nhập số tiền..."
+                  class="flex-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                <button
+                  id="customBtn"
+                  type="button"
+                  class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400 rounded-xl text-sm font-semibold transition border border-gray-200 dark:border-gray-600"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+
+            <!-- QR Code Card -->
+            <div
+              class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Quét mã VietQR
+                </h2>
+                <span
+                  id="qrAmountBadge"
+                  class="hidden px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-bold rounded-full"
+                ></span>
+              </div>
+
+              <!-- Placeholder: hiện khi chưa chọn số tiền -->
+              <div id="qrPlaceholder" class="flex flex-col items-center gap-3 py-10">
+                <div
+                  class="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
+                >
+                  <i class="ph ph-qr-code text-gray-300 dark:text-gray-600 text-5xl"></i>
+                </div>
+                <p class="text-sm text-gray-400 dark:text-gray-500 text-center leading-relaxed">
+                  Chọn số tiền ở trên<br />để hiển thị mã QR
+                </p>
+              </div>
+
+              <!-- QR thực: ẩn cho đến khi chọn số tiền -->
+              <div id="qrContent" class="hidden flex-col items-center gap-3">
+                <img
+                  id="qrImage"
+                  src=""
+                  alt="QR nạp tiền"
+                  class="w-56 h-56 sm:w-64 sm:h-64 rounded-2xl border border-gray-200 dark:border-gray-700 object-fill"
+                />
+                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Dùng app ngân hàng quét mã để chuyển đúng số tiền &amp; nội dung.
+                </p>
+                <div class="text-center">
+                  <span
+                    class="text-base font-bold text-blue-700 dark:text-blue-400"
+                    id="qrAmountText"
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- end LEFT -->
+
+          <!-- ===== RIGHT COLUMN ===== -->
+          <div class="space-y-4">
+            <!-- Transfer Code Hero Box -->
+            <div class="bg-blue-600 rounded-2xl p-5 text-white shadow">
+              <p class="text-blue-200 text-xs font-medium mb-1 uppercase tracking-wide">
+                Nội dung chuyển khoản
+              </p>
+              <div class="flex items-center gap-3 mt-1">
+                <span
+                  id="transferCodeDisplay"
+                  class="flex-1 font-mono text-2xl sm:text-3xl font-bold tracking-widest break-all"
+                  th:text="${transferCode}"
+                  >EZW0</span
+                >
+                <button
+                  id="copyCodeBtn"
+                  type="button"
+                  class="flex-shrink-0 flex items-center gap-1.5 bg-white/20 hover:bg-white/30 active:scale-95 text-white text-sm font-semibold px-3 py-2 rounded-xl transition"
+                >
+                  <i class="ph ph-copy text-base"></i>
+                  Sao chép
+                </button>
+              </div>
+              <p class="text-blue-200 text-xs mt-2">
+                ⚠ Nhập đúng nội dung này để hệ thống tự xác nhận.
+              </p>
+            </div>
+
+            <!-- Bank Details Card -->
+            <div
+              class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 space-y-3"
+            >
+              <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Thông tin tài khoản
+              </h2>
+              <div class="space-y-2 text-sm">
+                <div
+                  class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700"
+                >
+                  <span class="text-gray-500 dark:text-gray-400">Ngân hàng</span>
+                  <span
+                    class="font-semibold text-gray-800 dark:text-gray-100"
+                    th:text="${#strings.toUpperCase(appProperties.bank.id)}"
+                    >VCB</span
+                  >
+                </div>
+                <div
+                  class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700"
+                >
+                  <span class="text-gray-500 dark:text-gray-400">Số tài khoản</span>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="font-mono font-semibold text-gray-800 dark:text-gray-100"
+                      th:text="${appProperties.bank.accountNumber}"
+                      >0</span
+                    >
+                    <button
+                      type="button"
+                      class="copy-bank-acc p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                    >
+                      <i class="ph ph-copy text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                  <span class="text-gray-500 dark:text-gray-400">Chủ tài khoản</span>
+                  <span
+                    class="font-semibold text-gray-800 dark:text-gray-100"
+                    th:text="${appProperties.bank.accountName}"
+                    >Name</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Instructions -->
+            <div
+              class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4"
+            >
+              <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                Hướng dẫn nạp tiền
+              </h3>
+              <ol
+                class="text-sm text-amber-700 dark:text-amber-400 space-y-1.5 list-decimal list-inside"
+              >
+                <li>Chọn số tiền muốn nạp ở bên trên.</li>
+                <li>Chuyển khoản đúng số tiền &amp; đúng nội dung.</li>
+                <li>Giữ nguyên màn hình chờ hệ thống tự động cộng tiền.</li>
+                <li>Hệ thống tự động cộng tiền trong vài giây đến vài phút.</li>
+                <li>Nếu sau 5 phút chưa nhận, liên hệ hỗ trợ.</li>
+              </ol>
+            </div>
+
+            <!-- Waiting Indicator -->
+            <div
+              id="waitingBox"
+              class="hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 flex items-center gap-3"
+            >
+              <svg
+                class="w-5 h-5 text-blue-500 animate-spin flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+              <p class="text-sm text-blue-700 dark:text-blue-400 font-medium">
+                Đang chờ xác nhận giao dịch...
+              </p>
+            </div>
+          </div>
+          <!-- end RIGHT -->
+        </div>
+        <!-- end grid -->
+
+        <!-- ====== TOPUP HISTORY ====== -->
+        <div
+          id="topup-history"
+          class="mt-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm p-5"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <i class="ph ph-clock-counter-clockwise text-green-600 text-base"></i>
+              Lịch sử nạp tiền
+            </h2>
+            <span
+              th:if="${not topupLogs.isEmpty()}"
+              class="text-xs text-gray-400 dark:text-gray-500"
+              th:text="${topupLogs.getTotalElements() + ' giao dịch gần đây'}"
+              >0</span
+            >
+          </div>
+
+          <div th:if="${topupLogs.isEmpty()}" class="text-center py-8">
+            <i class="ph ph-wallet text-gray-200 dark:text-gray-700 text-4xl block mb-2"></i>
+            <p class="text-sm text-gray-400 dark:text-gray-500">Chưa có giao dịch nạp tiền nào.</p>
+          </div>
+
+          <div th:if="${not topupLogs.isEmpty()}" class="space-y-2">
+            <div
+              th:each="tx : ${topupLogs.content}"
+              class="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700/50"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  th:if="${tx.status == 'matched'}"
+                  class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0"
+                >
+                  <i class="ph ph-check text-green-600 dark:text-green-400"></i>
+                </div>
+                <div
+                  th:unless="${tx.status == 'matched'}"
+                  class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0"
+                >
+                  <i class="ph ph-clock text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <div class="min-w-0">
+                  <p
+                    class="text-xs text-gray-400 dark:text-gray-500"
+                    th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}"
+                  >
+                    01/01/2024
+                  </p>
+                  <p
+                    th:if="${tx.transferCode != null and !tx.transferCode.isEmpty()}"
+                    class="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[160px] sm:max-w-xs"
+                    th:text="${#strings.abbreviate(tx.transferCode, 55)}"
+                    th:title="${tx.transferCode}"
+                  ></p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+                <span
+                  th:if="${tx.status == 'matched'}"
+                  class="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full"
+                  >Đã xác nhận</span
+                >
+                <span
+                  th:unless="${tx.status == 'matched'}"
+                  class="text-xs font-medium text-yellow-700 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/40 px-2 py-0.5 rounded-full"
+                  >Chờ xử lý</span
+                >
+                <span
+                  class="text-sm font-bold text-gray-900 dark:text-white"
+                  th:text="'+' + ${#numbers.formatInteger(tx.amount, 0, 'COMMA') + 'đ'}"
+                  >+0đ</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end history -->
+      </div>
+      <!-- end container -->
+
+      <!-- JavaScript for Topup -->
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        (function () {
+          const BASE_URL = /*[[${appProperties.baseUrl}]]*/ '';
+          const BANK_ID = /*[[${appProperties.bank.id}]]*/ 'VCB';
+          const BANK_ACCOUNT = /*[[${appProperties.bank.accountNumber}]]*/ '0';
+          const BANK_NAME = /*[[${appProperties.bank.accountName}]]*/ '';
+          const TRANSFER_CODE = /*[[${transferCode}]]*/ 'EZW0';
+          const API_CHECK = BASE_URL + '/api/topup/status';
+          const VIET_QR_BASE = `https://img.vietqr.io/image/${BANK_ID}-${BANK_ACCOUNT}-compact2.png?addInfo=${encodeURIComponent(TRANSFER_CODE)}&accountName=${encodeURIComponent(BANK_NAME)}`;
+          const POLL_SINCE = Math.floor(Date.now() / 1000);
+
+          let selectedAmount = 0;
+          let pollTimer = null;
+
+          // Format VND
+          function fmtVND(n) {
+            return new Intl.NumberFormat('vi-VN').format(n) + 'đ';
+          }
+
+          // Toast — inline-style only so Tailwind JIT cannot interfere
+          function showToast(msg, type) {
+            var isSuccess = type === 'success';
+            var toast = document.createElement('div');
+            toast.style.cssText = [
+              'position:fixed',
+              'bottom:28px',
+              'left:50%',
+              'transform:translateX(-50%)',
+              'z-index:99999',
+              'display:flex',
+              'align-items:center',
+              'gap:8px',
+              'padding:12px 22px',
+              'border-radius:16px',
+              'background:' + (isSuccess ? '#22c55e' : '#f59e0b'),
+              'color:#fff',
+              'font-family:inherit',
+              'font-weight:600',
+              'font-size:14px',
+              'line-height:1.4',
+              'box-shadow:0 8px 32px rgba(0,0,0,0.22)',
+              'white-space:nowrap',
+              'pointer-events:auto',
+              'opacity:1',
+              'transition:opacity 0.3s ease',
+            ].join(';');
+            toast.innerHTML =
+              '<i class="ph ' +
+              (isSuccess ? 'ph-check-circle' : 'ph-warning-circle') +
+              '" style="font-size:18px;flex-shrink:0"></i><span>' +
+              msg +
+              '</span>';
+            document.body.appendChild(toast);
+            return new Promise(function (resolve) {
+              setTimeout(function () {
+                toast.style.opacity = '0';
+                setTimeout(function () {
+                  toast.remove();
+                  resolve();
+                }, 300);
+              }, 2500);
+            });
+          }
+
+          // Copy text
+          function copyText(text, btn) {
+            navigator.clipboard
+              .writeText(text)
+              .then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-check text-base"></i> Đã chép';
+                setTimeout(() => (btn.innerHTML = orig), 1800);
+              })
+              .catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+              });
+          }
+
+          // Set amount
+          function setAmount(amount) {
+            if (amount <= 0) return;
+            selectedAmount = amount;
+
+            // Highlight button
+            document.querySelectorAll('.amount-btn').forEach((b) => {
+              const active = parseInt(b.dataset.amount) === amount;
+              b.classList.toggle('border-blue-500', active);
+              b.classList.toggle('bg-blue-50', active);
+              b.classList.toggle('dark:bg-blue-900/30', active);
+              b.classList.toggle('text-blue-700', active);
+              b.classList.toggle('border-gray-200', !active);
+              b.classList.toggle('bg-gray-50', !active);
+              b.classList.toggle('text-gray-700', !active);
+            });
+
+            // Show QR
+            document.getElementById('qrPlaceholder').classList.add('hidden');
+            const qrContent = document.getElementById('qrContent');
+            qrContent.classList.remove('hidden');
+            qrContent.classList.add('flex');
+
+            // Update QR image
+            document.getElementById('qrImage').src = VIET_QR_BASE + '&amount=' + amount;
+
+            // Badge
+            const badge = document.getElementById('qrAmountBadge');
+            badge.textContent = fmtVND(amount);
+            badge.classList.remove('hidden');
+
+            // Amount text
+            document.getElementById('qrAmountText').textContent = fmtVND(amount);
+
+            // Start polling
+            startPolling();
+          }
+
+          // Amount buttons
+          document.querySelectorAll('.amount-btn').forEach((btn) => {
+            btn.addEventListener('click', () => setAmount(parseInt(btn.dataset.amount)));
+          });
+
+          // Custom amount
+          document.getElementById('customBtn').addEventListener('click', () => {
+            const val = parseInt(document.getElementById('customAmount').value.trim());
+            if (isNaN(val) || val <= 0) {
+              showToast('Vui lòng nhập số tiền', 'warning');
+            } else if (val < 10000) {
+              showToast('Số tiền tối thiểu là 10.000đ', 'warning');
+            } else {
+              setAmount(val);
+            }
+          });
+          document.getElementById('customAmount').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('customBtn').click();
+          });
+
+          // Copy transfer code
+          document.getElementById('copyCodeBtn').addEventListener('click', function () {
+            copyText(TRANSFER_CODE, this);
+          });
+
+          // Copy bank account
+          document.querySelector('.copy-bank-acc').addEventListener('click', function () {
+            copyText(BANK_ACCOUNT, this);
+          });
+
+          // Polling
+          function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            document.getElementById('waitingBox').classList.remove('hidden');
+            pollTimer = setInterval(checkTopup, 4000);
+          }
+
+          function checkTopup() {
+            fetch(API_CHECK + '?since=' + POLL_SINCE)
+              .then((r) => r.json())
+              .then((data) => {
+                if (data.credited) {
+                  clearInterval(pollTimer);
+                  document.getElementById('waitingBox').classList.add('hidden');
+                  showToast('Nạp tiền thành công! +' + fmtVND(data.amount), 'success').then(() =>
+                    location.reload(),
+                  );
+                }
+              })
+              .catch(() => {});
+          }
+        })();
+        /*]]>*/
+      </script>
+    </div>
+  </body>
+</html>

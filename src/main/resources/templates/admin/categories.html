@@ -1,0 +1,206 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout/admin :: adminLayout('Danh mục', ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Category list (2/3) -->
+        <div
+          class="lg:col-span-2 rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden"
+        >
+          <div class="px-5 py-4 border-b border-gray-100">
+            <h2 class="font-semibold text-gray-800 text-sm">
+              Danh sách danh mục (<span th:text="${#lists.size(categories)}">0</span>)
+            </h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 text-xs text-gray-400 uppercase border-b border-gray-100">
+                <tr>
+                  <th class="px-5 py-3 text-left">Danh mục</th>
+                  <th class="px-5 py-3 text-left">Slug</th>
+                  <th class="px-5 py-3 text-left">Icon</th>
+                  <th class="px-5 py-3 text-center">Thứ tự</th>
+                  <th class="px-5 py-3 text-right">SP</th>
+                  <th class="px-5 py-3 text-center w-16">Xóa</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                <tr th:each="cat : ${categories}" class="hover:bg-gray-50/60 transition-colors">
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2">
+                      <i th:class="${cat.icon} + ' text-indigo-500 text-base flex-shrink-0'"></i>
+                      <span class="font-medium text-gray-800" th:text="${cat.name}">Cat</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 font-mono text-gray-500 text-xs" th:text="${cat.slug}">
+                    slug
+                  </td>
+                  <td class="px-5 py-3 font-mono text-gray-400 text-xs" th:text="${cat.icon}">
+                    icon
+                  </td>
+                  <td
+                    class="px-5 py-3 text-center text-gray-500 text-xs"
+                    th:text="${cat.sortOrder}"
+                  >
+                    0
+                  </td>
+                  <td
+                    class="px-5 py-3 text-right text-gray-500 text-xs"
+                    th:text="${#numbers.formatInteger(cat.productCount, 0, 'COMMA')}"
+                  >
+                    0
+                  </td>
+                  <td class="px-5 py-3 text-center">
+                    <form
+                      th:if="${cat.productCount == 0}"
+                      th:action="@{/admin/categories/{id}/delete(id=${cat.id})}"
+                      method="post"
+                      th:data-confirm='|Xóa danh mục "${cat.name}"?|'
+                    >
+                      <input
+                        type="hidden"
+                        th:name="${_csrf.parameterName}"
+                        th:value="${_csrf.token}"
+                      />
+                      <button
+                        type="submit"
+                        class="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      >
+                        <i class="ph ph-trash text-base"></i>
+                      </button>
+                    </form>
+                    <span
+                      th:if="${cat.productCount > 0}"
+                      class="text-gray-300 text-xs"
+                      title="Còn sản phẩm, không thể xóa"
+                    >
+                      <i class="ph ph-lock-simple text-base"></i>
+                    </span>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(categories)}">
+                  <td colspan="6" class="px-5 py-8 text-center text-gray-400 text-sm">
+                    Chưa có danh mục
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add category form (1/3) -->
+        <div class="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden h-fit">
+          <div class="px-5 py-4 border-b border-gray-100">
+            <h2 class="font-semibold text-gray-800 text-sm">Thêm danh mục mới</h2>
+          </div>
+          <form th:action="@{/admin/categories/save}" method="post" class="p-5 space-y-4">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1"
+                >Tên <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="name"
+                required
+                maxlength="100"
+                placeholder="VD: Website Template"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1"
+                >Slug <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="slug"
+                required
+                maxlength="110"
+                placeholder="website-template"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-mono focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1"
+                >Phosphor Icon class</label
+              >
+              <input
+                type="text"
+                name="icon"
+                value="ph ph-folder"
+                maxlength="60"
+                placeholder="ph ph-folder"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-mono focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+              />
+              <p class="text-xs text-gray-400 mt-1">
+                Xem icon tại
+                <a
+                  href="https://phosphoricons.com"
+                  target="_blank"
+                  class="text-indigo-500 hover:underline"
+                  >phosphoricons.com</a
+                >
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Thứ tự sắp xếp</label>
+              <input
+                type="number"
+                name="sortOrder"
+                min="0"
+                max="255"
+                value="0"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full rounded-lg bg-indigo-600 text-white py-2.5 text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <i class="ph ph-plus-circle"></i> Thêm danh mục
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <script>
+        // Auto-generate slug from name
+        const catNameInput = document.querySelector('[name="name"]');
+        const catSlugInput = document.querySelector('[name="slug"]');
+        let catSlugTouched = false;
+
+        if (catSlugInput) {
+          catSlugInput.addEventListener('input', () => {
+            catSlugTouched = true;
+          });
+        }
+
+        if (catNameInput) {
+          catNameInput.addEventListener('input', () => {
+            if (catSlugTouched) return;
+            const s = catNameInput.value
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/đ/g, 'd')
+              .replace(/[^a-z0-9\\s-]/g, '')
+              .trim()
+              .replace(/\\s+/g, '-')
+              .replace(/-+/g, '-');
+            if (catSlugInput) catSlugInput.value = s;
+          });
+        }
+      </script>
+    </div>
+  </body>
+</html>

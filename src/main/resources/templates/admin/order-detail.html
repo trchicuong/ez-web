@@ -1,0 +1,69 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout/admin :: adminLayout('Đơn #' + ${order.id}, ~{::#content})}"
+>
+  <body>
+    <div id="content">
+      <div class="max-w-2xl">
+        <a
+          th:href="@{/admin/orders}"
+          class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 mb-4"
+        >
+          <i class="ph ph-arrow-left text-sm"></i> Quay lại
+        </a>
+        <div class="bg-white rounded-2xl border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-bold text-gray-900">
+              Đơn hàng #<span th:text="${order.id}">0</span>
+            </h2>
+            <span
+              class="px-3 py-1 text-xs font-semibold rounded-full"
+              th:classappend="${order.status == 'completed'} ? ' bg-green-100 text-green-700' : ' bg-yellow-100 text-yellow-700'"
+              th:text="${order.status == 'completed'} ? 'Hoàn thành' : 'Đang xử lý'"
+              >Status</span
+            >
+          </div>
+          <p class="text-sm text-gray-500 mb-4">
+            Khách hàng: <strong th:text="${order.user?.name}"></strong> (<span
+              th:text="${order.user?.email}"
+            ></span
+            >)
+          </p>
+          <div class="space-y-3 mb-4">
+            <div
+              th:each="item : ${order.items}"
+              class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0"
+            >
+              <img
+                th:src="${item.product.thumbnail}"
+                th:alt="${item.product.title}"
+                class="w-10 h-10 object-cover rounded-lg"
+                onerror="
+                  this.onerror = null;
+                  this.src = '/images/placeholder.png';
+                "
+              />
+              <div class="flex-1 text-sm" th:text="${item.product.title}">Title</div>
+              <div
+                class="font-semibold text-blue-600 text-sm"
+                th:text="${#numbers.formatInteger(item.priceSnapshot, 0, 'COMMA') + 'đ'}"
+              >
+                0đ
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-between font-bold text-sm pt-3 border-t border-gray-100">
+            <span>Tổng cộng</span>
+            <span
+              class="text-blue-600"
+              th:text="${#numbers.formatInteger(order.totalAmount, 0, 'COMMA') + 'đ'}"
+              >0đ</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
