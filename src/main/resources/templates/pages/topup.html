@@ -367,7 +367,7 @@
           const BANK_ACCOUNT = /*[[${appProperties.bank.accountNumber}]]*/ '0';
           const BANK_NAME = /*[[${appProperties.bank.accountName}]]*/ '';
           const TRANSFER_CODE = /*[[${transferCode}]]*/ 'EZW0';
-          const API_CHECK = BASE_URL + '/api/topup/status';
+          const API_CHECK = '/api/topup/status'; // relative URL — tránh lỗi khi BASE_URL là localhost
           const VIET_QR_BASE = `https://img.vietqr.io/image/${BANK_ID}-${BANK_ACCOUNT}-compact2.png?addInfo=${encodeURIComponent(TRANSFER_CODE)}&accountName=${encodeURIComponent(BANK_NAME)}`;
           const POLL_SINCE = Math.floor(Date.now() / 1000);
 
